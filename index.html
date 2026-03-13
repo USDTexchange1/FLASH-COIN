@@ -24,13 +24,15 @@ width:95%;
 max-width:420px;
 background:#0f172a;
 padding:25px;
-border-radius:12px;
+border-radius:14px;
 box-shadow:0 20px 60px rgba(0,0,0,0.7);
 display:none;
 position:relative;
 }
 
-.active{display:block;}
+.active{display:block}
+
+h2,h3{margin-top:0}
 
 input{
 width:100%;
@@ -55,44 +57,18 @@ cursor:pointer;
 
 .network{
 background:#1e293b;
-padding:15px;
+padding:14px;
 border-radius:10px;
 margin-top:10px;
 cursor:pointer;
+transition:0.3s;
 }
 
-.selected{border:2px solid #4ade80;}
+.network:hover{background:#273549}
 
-#toast{
-position:fixed;
-bottom:30px;
-left:50%;
-transform:translateX(-50%);
-background:#111;
-padding:14px 22px;
-border-radius:8px;
-opacity:0;
-transition:.4s;
-z-index:9999;
-}
-
-#toast.show{opacity:1;}
-
-table{
-width:100%;
-margin-top:15px;
-font-size:12px;
-}
-
-td{
-border-bottom:1px solid #333;
-padding:6px;
-}
-
-.warning{
-font-size:12px;
-color:#facc15;
-margin-top:5px;
+.selected{
+border:2px solid #4ade80;
+box-shadow:0 0 10px #22c55e;
 }
 
 .logout{
@@ -107,9 +83,52 @@ border-radius:6px;
 cursor:pointer;
 }
 
+.back{
+background:#64748b;
+margin-bottom:10px;
+}
+
 .copyBtn{
-margin-top:8px;
 background:#3b82f6;
+margin-top:8px;
+}
+
+.warning{
+font-size:12px;
+color:#facc15;
+margin-top:5px;
+}
+
+table{
+width:100%;
+margin-top:15px;
+font-size:12px;
+border-collapse:collapse;
+}
+
+td{
+border-bottom:1px solid #333;
+padding:6px;
+}
+
+#toast{
+position:fixed;
+top:20px;
+left:50%;
+transform:translateX(-50%);
+background:#111;
+padding:14px 22px;
+border-radius:8px;
+opacity:0;
+transition:.4s;
+z-index:9999;
+}
+
+#toast.show{opacity:1}
+
+.users{
+font-size:12px;
+color:#94a3b8;
 }
 
 </style>
@@ -136,6 +155,8 @@ background:#3b82f6;
 <span id="goLogin" style="color:#4ade80;cursor:pointer">Iniciar sesión</span>
 </p>
 
+<p class="users">Usuarios registrados: <span id="userCount"></span></p>
+
 </div>
 
 <!-- LOGIN -->
@@ -159,9 +180,10 @@ background:#3b82f6;
 
 <div class="container" id="dashboard">
 
-<button class="logout" onclick="logout()">Cerrar</button>
+<button class="logout" id="logoutBtn">Cerrar</button>
 
 <h2>FLASH/COIN</h2>
+
 <p id="welcome"></p>
 
 <h3>Seleccionar red para recibir</h3>
@@ -178,7 +200,9 @@ background:#3b82f6;
 
 <div class="container" id="deposit">
 
-<button class="logout" onclick="logout()">Cerrar</button>
+<button class="logout" id="logoutBtn2">Cerrar</button>
+
+<button class="back" id="backBtn">Volver</button>
 
 <h3 id="networkTitle"></h3>
 
@@ -186,13 +210,16 @@ background:#3b82f6;
 
 <input id="depositAddress" readonly value="0x3670a0bFfb8b8A6D42177807F8dFd369A3995b9e">
 
-<button class="copyBtn" onclick="copyAddress()">Copiar dirección</button>
+<button class="copyBtn" id="copyBtn">Copiar dirección</button>
 
 <p class="warning">Enviar solo USDT BEP20</p>
 
 <input id="wallet" placeholder="Dirección donde recibir">
-<input id="amount" type="number" min="0" placeholder="Cantidad a depositar USDT">
+
+<input id="amount" type="number" placeholder="Cantidad a depositar USDT">
+
 <input id="receive" readonly placeholder="Cantidad a recibir">
+
 <input id="hash" placeholder="Hash de transacción">
 
 <button id="depositBtn">Confirmar depósito</button>
@@ -205,58 +232,86 @@ background:#3b82f6;
 
 <script>
 
-const toastBox=document.getElementById("toast")
-
-function toast(msg){
-toastBox.innerText=msg
-toastBox.classList.add("show")
-setTimeout(()=>{toastBox.classList.remove("show")},3000)
-}
-
-function copyAddress(){
-let address=document.getElementById("depositAddress").value
-navigator.clipboard.writeText(address)
-toast("Dirección copiada")
-}
-
-function logout(){
-localStorage.removeItem("session")
-location.reload()
-}
-
 /* ELEMENTOS */
+
+const toastBox=document.getElementById("toast")
 
 const registerBox=document.getElementById("register")
 const loginBox=document.getElementById("login")
 const dashboardBox=document.getElementById("dashboard")
 const depositBox=document.getElementById("deposit")
 
+const regUser=document.getElementById("regUser")
+const regEmail=document.getElementById("regEmail")
+const regPass=document.getElementById("regPass")
+const regPass2=document.getElementById("regPass2")
+
+const logUser=document.getElementById("logUser")
+const logPass=document.getElementById("logPass")
+
 const registerBtn=document.getElementById("registerBtn")
 const loginBtn=document.getElementById("loginBtn")
-const confirmNet=document.getElementById("confirmNet")
 
 const goLogin=document.getElementById("goLogin")
 const goRegister=document.getElementById("goRegister")
 
-const welcome=document.getElementById("welcome")
-const networkTitle=document.getElementById("networkTitle")
+const confirmNet=document.getElementById("confirmNet")
 
 const wallet=document.getElementById("wallet")
 const amount=document.getElementById("amount")
 const receive=document.getElementById("receive")
 const hash=document.getElementById("hash")
 
+const depositBtn=document.getElementById("depositBtn")
+
 const historyTable=document.getElementById("history")
 
-function show(panel){
-document.querySelectorAll(".container").forEach(x=>x.classList.remove("active"))
-panel.classList.add("active")
+const welcome=document.getElementById("welcome")
+const networkTitle=document.getElementById("networkTitle")
+
+const userCount=document.getElementById("userCount")
+
+/* TOAST */
+
+function toast(msg){
+
+toastBox.innerText=msg
+toastBox.classList.add("show")
+
+setTimeout(()=>{
+
+toastBox.classList.remove("show")
+
+},3000)
+
 }
 
-/* CAMBIAR PANELES */
+/* PANELES */
+
+function show(panel){
+
+document.querySelectorAll(".container").forEach(x=>x.classList.remove("active"))
+
+panel.classList.add("active")
+
+}
+
+/* CAMBIAR PANTALLA */
 
 goLogin.onclick=()=>show(loginBox)
 goRegister.onclick=()=>show(registerBox)
+
+/* CONTADOR USUARIOS */
+
+function updateUserCount(){
+
+let users=JSON.parse(localStorage.getItem("users"))||[]
+
+userCount.innerText=users.length
+
+}
+
+updateUserCount()
 
 /* REGISTRO */
 
@@ -268,30 +323,42 @@ let p=regPass.value
 let p2=regPass2.value
 
 if(!u||!e||!p){
+
 toast("Complete todos los campos")
+
 return
+
 }
 
 if(p!==p2){
+
 toast("Las contraseñas no coinciden")
+
 return
+
 }
 
 let users=JSON.parse(localStorage.getItem("users"))||[]
 
 if(users.find(x=>x.user===u)){
+
 toast("Usuario ya existe")
+
 return
+
 }
 
 users.push({user:u,email:e,pass:p})
+
 localStorage.setItem("users",JSON.stringify(users))
+
+localStorage.setItem("session",u)
 
 toast("Registro exitoso")
 
-setTimeout(()=>{
-show(loginBox)
-},1000)
+updateUserCount()
+
+showDashboard(u)
 
 }
 
@@ -307,16 +374,14 @@ let users=JSON.parse(localStorage.getItem("users"))||[]
 let user=users.find(x=>x.user===u && x.pass===p)
 
 if(!user){
+
 toast("Datos incorrectos")
+
 return
+
 }
 
 localStorage.setItem("session",u)
-
-/* limpiar campos */
-
-logUser.value=""
-logPass.value=""
 
 showDashboard(u)
 
@@ -324,71 +389,285 @@ showDashboard(u)
 
 /* DASHBOARD */
 
+function showDashboard(user){
+
+welcome.innerText="Bienvenido "+user
+
+show(dashboardBox)
+
+}
+
+/* LOGOUT */
+
+document.getElementById("logoutBtn").onclick=logout
+document.getElementById("logoutBtn2").onclick=logout
+
+function logout(){
+
+localStorage.removeItem("session")
+
+location.reload()
+
+}
+
+/* COPIAR DIRECCION */
+
+document.getElementById("copyBtn").onclick=()=>{
+
+navigator.clipboard.writeText(document.getElementById("depositAddress").value)
+
+toast("Dirección copiada")
+
+}
+
+/* SELECCION RED */
+
 let selectedNetwork=null
 
 document.querySelectorAll(".network").forEach(el=>{
+
 el.onclick=function(){
+
 document.querySelectorAll(".network").forEach(n=>n.classList.remove("selected"))
+
 this.classList.add("selected")
+
 selectedNetwork=this.dataset.net
+
 }
+
 })
 
 confirmNet.onclick=()=>{
+
 if(!selectedNetwork){
+
 toast("Seleccione una red")
+
 return
+
 }
-networkTitle.innerText="Red seleccionada: "+selectedNetwork
+
+networkTitle.innerText="Recibir en: "+selectedNetwork
+
 show(depositBox)
+
+}
+
+/* VOLVER */
+
+document.getElementById("backBtn").onclick=()=>{
+
+show(dashboardBox)
+
 }
 
 /* CONVERSION */
 
 amount.oninput=()=>{
+
 let v=parseFloat(amount.value)
 
 if(!v)return
 
 if(v<30){
-receive.value="mínimo 30"
+
+receive.value="mínimo 30 USDT"
+
 return
+
 }
 
-receive.value=v*5+" USDT"
+if(selectedNetwork=="BTC"){
+
+receive.value=(v/1000).toFixed(6)+" BTC"
+
+}else{
+
+receive.value=(v*5)+" USDT"
+
 }
 
-/* HISTORIAL */
+}
 
-let history=JSON.parse(localStorage.getItem("history"))||[]
+/* VALIDAR HASH */
+
+function validHash(h){
+
+return /^[A-Fa-f0-9]{64}$/.test(h)
+
+}
+
+/* VALIDAR WALLET */
+
+function validWallet(addr){
+
+if(selectedNetwork=="TRC20") return addr.startsWith("T")
+
+if(selectedNetwork=="BEP20") return addr.startsWith("0x")
+
+if(selectedNetwork=="BTC") return addr.startsWith("1")||addr.startsWith("3")||addr.startsWith("bc1")
+
+return false
+
+}
+
+/* HISTORIAL POR USUARIO */
+
+function getHistory(){
+
+let user=localStorage.getItem("session")
+
+return JSON.parse(localStorage.getItem("history_"+user))||[]
+
+}
+
+function saveHistory(data){
+
+let user=localStorage.getItem("session")
+
+localStorage.setItem("history_"+user,JSON.stringify(data))
+
+}
+
+/* HASH USADOS */
+
+let usedHash=JSON.parse(localStorage.getItem("usedHash"))||[]
+
+/* CARGAR HISTORIAL */
 
 function loadHistory(){
+
+let history=getHistory()
 
 historyTable.innerHTML=""
 
 history.forEach(t=>{
+
 historyTable.innerHTML+=`
+
 <tr>
+
 <td>${t.net}</td>
+
 <td>${t.dep}</td>
+
 <td>${t.rec}</td>
-</tr>`
+
+</tr>
+
+`
+
 })
 
 }
 
-function showDashboard(user){
-welcome.innerText="Bienvenido "+user
-show(dashboardBox)
+loadHistory()
+
+/* DEPOSITO */
+
+depositBtn.onclick=()=>{
+
+let w=wallet.value.trim()
+let a=parseFloat(amount.value)
+let h=hash.value.trim()
+
+if(!w||!a||!h){
+
+toast("Complete todos los campos")
+
+return
+
 }
+
+if(a<30){
+
+toast("Depósito mínimo 30 USDT")
+
+return
+
+}
+
+if(!validWallet(w)){
+
+toast("Dirección wallet inválida")
+
+return
+
+}
+
+if(!validHash(h)){
+
+toast("Hash incorrecto")
+
+return
+
+}
+
+if(usedHash.includes(h)){
+
+toast("Hash ya utilizado")
+
+return
+
+}
+
+toast("Depósito en procesamiento")
+
+usedHash.push(h)
+
+localStorage.setItem("usedHash",JSON.stringify(usedHash))
+
+setTimeout(()=>{
+
+toast("Depósito confirmado")
+
+let rec
+
+if(selectedNetwork=="BTC"){
+
+rec=(a/1000).toFixed(6)+" BTC"
+
+}else{
+
+rec=(a*5)+" USDT"
+
+}
+
+let history=getHistory()
+
+history.push({
+
+net:selectedNetwork,
+
+dep:a+" USDT",
+
+rec:rec
+
+})
+
+saveHistory(history)
+
+loadHistory()
+
+wallet.value=""
+amount.value=""
+receive.value=""
+hash.value=""
+
+},1000)
+
+}
+
+/* SESION */
 
 let session=localStorage.getItem("session")
 
 if(session){
-showDashboard(session)
-}
 
-loadHistory()
+showDashboard(session)
+
+}
 
 </script>
 
