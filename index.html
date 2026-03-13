@@ -101,7 +101,7 @@ border:2px solid #4ade80;
 
 #toast{
 position:fixed;
-bottom:25px;
+bottom:30px;
 left:50%;
 transform:translateX(-50%);
 background:#111;
@@ -109,15 +109,17 @@ padding:14px 22px;
 border-radius:8px;
 opacity:0;
 transition:0.4s;
+z-index:9999;
 }
 
 #toast.show{
 opacity:1;
+transform:translate(-50%,-10px);
 }
 
 #topToast{
 position:fixed;
-top:20px;
+top:25px;
 left:50%;
 transform:translateX(-50%);
 background:#22c55e;
@@ -125,6 +127,7 @@ padding:14px 22px;
 border-radius:8px;
 opacity:0;
 transition:0.4s;
+z-index:9999;
 }
 
 #topToast.show{
@@ -366,9 +369,15 @@ users.push({user:u,email:e,pass:p});
 
 localStorage.setItem("users",JSON.stringify(users));
 
-toast("Registro completado");
+localStorage.setItem("session",u);
 
-showLogin();
+toast("Registro exitoso");
+
+setTimeout(()=>{
+
+showDashboard();
+
+},1200);
 
 }
 
@@ -673,13 +682,9 @@ table.innerHTML+=`
 <tr>
 
 <td>${t.date}</td>
-
 <td>${t.network}</td>
-
 <td>${t.deposit}</td>
-
 <td>${t.receive}</td>
-
 <td>${t.hash.slice(0,10)}...</td>
 
 </tr>
