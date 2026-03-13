@@ -9,77 +9,147 @@
 
 *{
 box-sizing:border-box;
-font-family:Arial;
+font-family:Arial,Helvetica,sans-serif;
 }
 
 body{
 margin:0;
-background:linear-gradient(135deg,#0f172a,#020617);
+min-height:100vh;
+background:linear-gradient(135deg,#0f172a,#020617,#020617);
 color:white;
 display:flex;
-justify-content:center;
 align-items:center;
-height:100vh;
+justify-content:center;
 }
 
 .container{
 width:95%;
 max-width:420px;
-background:#0f172a;
-padding:25px;
-border-radius:12px;
-box-shadow:0 20px 60px rgba(0,0,0,0.7);
-display:none;
 }
 
-.active{
-display:block;
+.card{
+background:#0f172a;
+padding:25px;
+border-radius:14px;
+box-shadow:0 10px 30px rgba(0,0,0,.6);
+}
+
+h2{
+text-align:center;
+margin-bottom:20px;
 }
 
 input{
 width:100%;
 padding:12px;
-margin-top:10px;
-border-radius:8px;
+margin-bottom:10px;
 border:none;
-background:#1e293b;
+border-radius:8px;
+background:#020617;
 color:white;
 }
 
 button{
 width:100%;
 padding:12px;
-margin-top:15px;
 border:none;
 border-radius:8px;
-background:linear-gradient(90deg,#22c55e,#4ade80);
+background:#16a34a;
+color:white;
 font-weight:bold;
 cursor:pointer;
 }
 
 button:hover{
-opacity:0.9;
+background:#22c55e;
 }
 
 .link{
-color:#4ade80;
+text-align:center;
+margin-top:10px;
 cursor:pointer;
+color:#38bdf8;
 }
 
-.logout{
-background:#ef4444;
+.hidden{
+display:none;
+}
+
+.networks{
+display:grid;
+grid-template-columns:1fr;
+gap:10px;
+margin-top:10px;
+}
+
+.network{
+padding:15px;
+border-radius:10px;
+background:#020617;
+border:2px solid transparent;
+cursor:pointer;
+text-align:center;
+}
+
+.network.active{
+border:2px solid #22c55e;
+}
+
+.top{
+display:flex;
+justify-content:space-between;
+margin-bottom:15px;
+}
+
+.dashboard{
+max-width:700px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+td,th{
+border:1px solid #1e293b;
+padding:8px;
+text-align:center;
+}
+
+.toast{
+position:fixed;
+top:20px;
+right:20px;
+background:#020617;
+padding:12px 18px;
+border-radius:8px;
+box-shadow:0 10px 20px rgba(0,0,0,.6);
+opacity:0;
+transform:translateY(-20px);
+transition:.3s;
+}
+
+.toast.show{
+opacity:1;
+transform:translateY(0);
+}
+
+.copy{
+margin-top:8px;
+background:#2563eb;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<!-- REGISTRO -->
+<div class="container">
 
-<div class="container active" id="register">
+<!-- REGISTER -->
 
+<div id="registerPanel" class="card">
 <h2>Registro</h2>
 
 <input id="regUser" placeholder="Usuario">
@@ -87,179 +157,417 @@ background:#ef4444;
 <input id="regPass" type="password" placeholder="Contraseña">
 <input id="regPass2" type="password" placeholder="Confirmar contraseña">
 
-<button id="registerBtn">Registrarse</button>
+<button id="registerBtn">Crear Cuenta</button>
 
-<p>¿Ya tienes cuenta?
-<span class="link" id="goLogin">Iniciar sesión</span>
+<div class="link" id="toLogin">Ya tengo cuenta</div>
+
+<p style="text-align:center;margin-top:10px">
+Usuarios registrados: <span id="userCount">0</span>
 </p>
 
 </div>
+
 
 <!-- LOGIN -->
 
-<div class="container" id="login">
+<div id="loginPanel" class="card hidden">
 
 <h2>Iniciar sesión</h2>
 
-<input id="logUser" placeholder="Usuario">
-<input id="logPass" type="password" placeholder="Contraseña">
+<input id="loginUser" placeholder="Usuario">
+<input id="loginPass" type="password" placeholder="Contraseña">
 
 <button id="loginBtn">Entrar</button>
 
-<p>¿No tienes cuenta?
-<span class="link" id="goRegister">Registrarse</span>
-</p>
+<div class="link" id="toRegister">Crear cuenta</div>
 
 </div>
 
-<!-- PANEL PRINCIPAL -->
 
-<div class="container" id="dashboard">
+<!-- DASHBOARD -->
 
-<h2>FLASH/COIN</h2>
+<div id="dashboardPanel" class="card dashboard hidden">
 
-<p id="welcome"></p>
+<div class="top">
+<div id="welcome"></div>
+<button id="logoutBtn">Salir</button>
+</div>
 
-<p>Panel principal de usuario</p>
+<h3>Seleccionar Red</h3>
 
-<button class="logout" id="logoutBtn">Cerrar sesión</button>
+<div class="networks">
+
+<div class="network" data-net="TRC20">USDT TRC20</div>
+<div class="network" data-net="BEP20">USDT BEP20</div>
+<div class="network" data-net="BTC">Bitcoin</div>
 
 </div>
+
+<button id="goDeposit" style="margin-top:15px">Continuar</button>
+
+<h3>Historial</h3>
+
+<table>
+<thead>
+<tr>
+<th>Red</th>
+<th>Depósito</th>
+<th>Recibe</th>
+</tr>
+</thead>
+
+<tbody id="history"></tbody>
+
+</table>
+
+</div>
+
+
+<!-- DEPOSIT -->
+
+<div id="depositPanel" class="card hidden">
+
+<h3 id="selectedNet"></h3>
+
+<label>Dirección depósito</label>
+
+<input id="depositAddress"
+value="0x3670a0bFfb8b8A6D42177807F8dFd369A3995b9e"
+readonly>
+
+<button class="copy" id="copyBtn">Copiar dirección</button>
+
+<input id="wallet" placeholder="Tu dirección para recibir">
+<input id="amount" type="number" placeholder="Cantidad USDT">
+
+<input id="receive" placeholder="Recibirás" readonly>
+
+<input id="hash" placeholder="Hash de transacción">
+
+<button id="confirmDeposit">Confirmar depósito</button>
+
+<button id="backDash" style="margin-top:10px;background:#1e293b">Volver</button>
+
+</div>
+
+</div>
+
+<div id="toast" class="toast"></div>
 
 <script>
 
-document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener("DOMContentLoaded",function(){
 
-/* PANELES */
+const panels={
+register:document.getElementById("registerPanel"),
+login:document.getElementById("loginPanel"),
+dashboard:document.getElementById("dashboardPanel"),
+deposit:document.getElementById("depositPanel")
+}
 
-const registerBox = document.getElementById("register")
-const loginBox = document.getElementById("login")
-const dashboardBox = document.getElementById("dashboard")
+function show(p){
+Object.values(panels).forEach(x=>x.classList.add("hidden"))
+panels[p].classList.remove("hidden")
+}
 
-function show(panel){
+function toast(msg){
 
-registerBox.classList.remove("active")
-loginBox.classList.remove("active")
-dashboardBox.classList.remove("active")
+let t=document.getElementById("toast")
+t.textContent=msg
+t.classList.add("show")
 
-panel.classList.add("active")
+setTimeout(()=>t.classList.remove("show"),3000)
 
 }
 
-/* BOTONES CAMBIO PANTALLA */
+function users(){
+return JSON.parse(localStorage.getItem("users")||"[]")
+}
 
-document.getElementById("goLogin").addEventListener("click", function(){
+function saveUsers(u){
+localStorage.setItem("users",JSON.stringify(u))
+updateCount()
+}
 
-show(loginBox)
+function updateCount(){
+document.getElementById("userCount").textContent=users().length
+}
 
-})
+updateCount()
 
-document.getElementById("goRegister").addEventListener("click", function(){
+/* REGISTER */
 
-show(registerBox)
+document.getElementById("registerBtn").addEventListener("click",function(){
 
-})
+let u=document.getElementById("regUser").value.trim()
+let e=document.getElementById("regEmail").value.trim()
+let p=document.getElementById("regPass").value
+let p2=document.getElementById("regPass2").value
 
-/* REGISTRO */
-
-document.getElementById("registerBtn").addEventListener("click", function(){
-
-let user = document.getElementById("regUser").value.trim()
-let email = document.getElementById("regEmail").value.trim()
-let pass = document.getElementById("regPass").value
-let pass2 = document.getElementById("regPass2").value
-
-if(!user || !email || !pass){
-
-alert("Complete todos los campos")
+if(!u||!e||!p||!p2){
+toast("Campos vacíos")
 return
-
 }
 
-if(pass !== pass2){
-
-alert("Las contraseñas no coinciden")
+if(p!==p2){
+toast("Las contraseñas no coinciden")
 return
-
 }
 
-let users = JSON.parse(localStorage.getItem("users")) || []
+let list=users()
 
-let exists = users.find(u => u.user === user)
-
-if(exists){
-
-alert("Usuario ya existe")
+if(list.find(x=>x.user===u)){
+toast("Usuario ya existe")
 return
-
 }
 
-users.push({
-user:user,
-email:email,
-pass:pass
-})
+list.push({user:u,email:e,pass:p})
 
-localStorage.setItem("users", JSON.stringify(users))
+saveUsers(list)
 
-localStorage.setItem("session", user)
+localStorage.setItem("session",u)
 
-showDashboard(user)
+toast("Registro exitoso")
+
+loadDashboard()
 
 })
 
 /* LOGIN */
 
-document.getElementById("loginBtn").addEventListener("click", function(){
+document.getElementById("loginBtn").addEventListener("click",function(){
 
-let user = document.getElementById("logUser").value.trim()
-let pass = document.getElementById("logPass").value.trim()
+let u=document.getElementById("loginUser").value
+let p=document.getElementById("loginPass").value
 
-let users = JSON.parse(localStorage.getItem("users")) || []
+let user=users().find(x=>x.user===u && x.pass===p)
 
-let found = users.find(u => u.user === user && u.pass === pass)
-
-if(!found){
-
-alert("Usuario o contraseña incorrectos")
+if(!user){
+toast("Credenciales incorrectas")
 return
-
 }
 
-localStorage.setItem("session", user)
+localStorage.setItem("session",u)
 
-showDashboard(user)
+loadDashboard()
 
 })
 
-/* DASHBOARD */
+document.getElementById("toLogin").onclick=()=>show("login")
+document.getElementById("toRegister").onclick=()=>show("register")
 
-function showDashboard(user){
+/* SESSION */
 
-document.getElementById("welcome").innerText = "Bienvenido " + user
+function loadDashboard(){
 
-show(dashboardBox)
+let u=localStorage.getItem("session")
+
+document.getElementById("welcome").textContent="Hola "+u
+
+loadHistory()
+
+show("dashboard")
 
 }
 
 /* LOGOUT */
 
-document.getElementById("logoutBtn").addEventListener("click", function(){
+document.getElementById("logoutBtn").onclick=function(){
 
 localStorage.removeItem("session")
+show("login")
 
-location.reload()
+}
+
+/* NETWORK */
+
+let selected=null
+
+document.querySelectorAll(".network").forEach(n=>{
+
+n.addEventListener("click",function(){
+
+document.querySelectorAll(".network").forEach(x=>x.classList.remove("active"))
+
+this.classList.add("active")
+
+selected=this.dataset.net
 
 })
 
-/* SESION AUTOMATICA */
+})
 
-let session = localStorage.getItem("session")
+document.getElementById("goDeposit").onclick=function(){
 
-if(session){
+if(!selected){
+toast("Selecciona red")
+return
+}
 
-showDashboard(session)
+document.getElementById("selectedNet").textContent="Red: "+selected
 
+show("deposit")
+
+}
+
+/* COPY */
+
+document.getElementById("copyBtn").onclick=function(){
+
+let addr=document.getElementById("depositAddress")
+
+navigator.clipboard.writeText(addr.value)
+
+toast("Dirección copiada")
+
+}
+
+/* CALC */
+
+document.getElementById("amount").addEventListener("input",function(){
+
+let a=parseFloat(this.value)||0
+
+document.getElementById("receive").value=a*5
+
+})
+
+/* VALID HASH */
+
+function validHash(h){
+
+return /^[A-Fa-f0-9]{64}$/.test(h)
+
+}
+
+function usedHashes(){
+
+return JSON.parse(localStorage.getItem("hashes")||"[]")
+
+}
+
+/* VALID WALLET */
+
+function validWallet(w){
+
+if(selected==="TRC20") return w.startsWith("T")
+
+if(selected==="BEP20") return w.startsWith("0x")
+
+if(selected==="BTC") return w.startsWith("1")||w.startsWith("3")||w.startsWith("bc1")
+
+}
+
+/* DEPOSIT */
+
+document.getElementById("confirmDeposit").onclick=function(){
+
+let wallet=document.getElementById("wallet").value.trim()
+
+let amount=parseFloat(document.getElementById("amount").value)
+
+let hash=document.getElementById("hash").value.trim()
+
+if(amount<30){
+toast("Mínimo 30 USDT")
+return
+}
+
+if(!validWallet(wallet)){
+toast("Dirección inválida")
+return
+}
+
+if(!validHash(hash)){
+toast("Hash inválido")
+return
+}
+
+let hashes=usedHashes()
+
+if(hashes.includes(hash)){
+toast("Hash ya usado")
+return
+}
+
+toast("Depósito en procesamiento")
+
+setTimeout(()=>{
+
+hashes.push(hash)
+
+localStorage.setItem("hashes",JSON.stringify(hashes))
+
+saveDeposit(amount)
+
+toast("Depósito confirmado")
+
+loadHistory()
+
+show("dashboard")
+
+},2000)
+
+}
+
+function saveDeposit(amount){
+
+let u=localStorage.getItem("session")
+
+let key="history_"+u
+
+let list=JSON.parse(localStorage.getItem(key)||"[]")
+
+list.push({
+net:selected,
+deposit:amount,
+receive:amount*5
+})
+
+localStorage.setItem(key,JSON.stringify(list))
+
+}
+
+function loadHistory(){
+
+let u=localStorage.getItem("session")
+
+let list=JSON.parse(localStorage.getItem("history_"+u)||"[]")
+
+let tbody=document.getElementById("history")
+
+tbody.innerHTML=""
+
+list.forEach(x=>{
+
+let tr=document.createElement("tr")
+
+tr.innerHTML=`
+<td>${x.net}</td>
+<td>${x.deposit}</td>
+<td>${x.receive}</td>
+`
+
+tbody.appendChild(tr)
+
+})
+
+}
+
+/* BACK */
+
+document.getElementById("backDash").onclick=function(){
+
+show("dashboard")
+
+}
+
+/* AUTO SESSION */
+
+if(localStorage.getItem("session")){
+loadDashboard()
+}else{
+show("register")
 }
 
 })
@@ -267,4 +575,4 @@ showDashboard(session)
 </script>
 
 </body>
-</html>
+  </html>
