@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FLASH/COIN</title>
+
+<title>FLASH Platform</title>
 
 <style>
 
@@ -15,11 +16,11 @@ font-family:Arial,Helvetica,sans-serif;
 body{
 margin:0;
 min-height:100vh;
-background:linear-gradient(135deg,#0f172a,#020617,#020617);
-color:white;
+background:linear-gradient(135deg,#020617,#020617,#0f172a);
 display:flex;
 align-items:center;
 justify-content:center;
+color:white;
 }
 
 .container{
@@ -31,10 +32,10 @@ max-width:420px;
 background:#0f172a;
 padding:25px;
 border-radius:14px;
-box-shadow:0 10px 30px rgba(0,0,0,.6);
+box-shadow:0 15px 40px rgba(0,0,0,.6);
 }
 
-h2{
+h2,h3{
 text-align:center;
 margin-bottom:20px;
 }
@@ -67,8 +68,8 @@ background:#22c55e;
 .link{
 text-align:center;
 margin-top:10px;
-cursor:pointer;
 color:#38bdf8;
+cursor:pointer;
 }
 
 .hidden{
@@ -86,8 +87,8 @@ padding:15px;
 border-radius:10px;
 background:#020617;
 border:2px solid transparent;
-cursor:pointer;
 text-align:center;
+cursor:pointer;
 }
 
 .network.active{
@@ -97,6 +98,7 @@ border:2px solid #22c55e;
 .top{
 display:flex;
 justify-content:space-between;
+align-items:center;
 margin-bottom:15px;
 }
 
@@ -110,10 +112,15 @@ border-collapse:collapse;
 margin-top:10px;
 }
 
-td,th{
+th,td{
 border:1px solid #1e293b;
 padding:8px;
 text-align:center;
+}
+
+.copy{
+background:#2563eb;
+margin-top:5px;
 }
 
 .toast{
@@ -121,7 +128,7 @@ position:fixed;
 top:20px;
 right:20px;
 background:#020617;
-padding:12px 18px;
+padding:12px 20px;
 border-radius:8px;
 box-shadow:0 10px 20px rgba(0,0,0,.6);
 opacity:0;
@@ -132,11 +139,6 @@ transition:.3s;
 .toast.show{
 opacity:1;
 transform:translateY(0);
-}
-
-.copy{
-margin-top:8px;
-background:#2563eb;
 }
 
 </style>
@@ -150,16 +152,16 @@ background:#2563eb;
 
 <div id="registerPanel" class="card">
 
-<h2>Registro</h2>
+<h2>Crear Cuenta</h2>
 
 <input id="regUser" placeholder="Usuario">
 <input id="regEmail" placeholder="Correo">
 <input id="regPass" type="password" placeholder="Contraseña">
 <input id="regPass2" type="password" placeholder="Confirmar contraseña">
 
-<button id="registerBtn">Crear Cuenta</button>
+<button id="registerBtn">Registrarse</button>
 
-<div class="link" id="toLogin">Ya tengo cuenta</div>
+<div class="link" id="goLogin">Ya tengo cuenta</div>
 
 <p style="text-align:center;margin-top:10px">
 Usuarios registrados: <span id="userCount">0</span>
@@ -178,7 +180,7 @@ Usuarios registrados: <span id="userCount">0</span>
 
 <button id="loginBtn">Entrar</button>
 
-<div class="link" id="toRegister">Crear cuenta</div>
+<div class="link" id="goRegister">Crear cuenta</div>
 
 </div>
 
@@ -188,30 +190,43 @@ Usuarios registrados: <span id="userCount">0</span>
 
 <div class="top">
 <div id="welcome"></div>
-<button id="logoutBtn">Salir</button>
+<button id="logoutBtn">Cerrar sesión</button>
 </div>
 
-<h3>Seleccionar Red</h3>
+<h3>Comprar FLASH</h3>
 
 <div class="networks">
 
-<div class="network" data-net="TRC20">USDT TRC20</div>
-<div class="network" data-net="BEP20">USDT BEP20</div>
-<div class="network" data-net="BTC">Bitcoin</div>
+<div class="network" data-net="TRC20">
+USDT TRC20
+</div>
+
+<div class="network" data-net="BEP20">
+USDT BEP20
+</div>
+
+<div class="network" data-net="BTC">
+Bitcoin
+</div>
 
 </div>
 
-<button id="goDeposit" style="margin-top:15px">Continuar</button>
+<button id="confirmNetwork" style="margin-top:15px">
+Confirmar moneda
+</button>
 
 <h3>Historial</h3>
 
 <table>
+
 <thead>
+
 <tr>
 <th>Red</th>
-<th>Depósito</th>
-<th>Recibe</th>
+<th>Pago</th>
+<th>FLASH</th>
 </tr>
+
 </thead>
 
 <tbody id="history"></tbody>
@@ -224,26 +239,34 @@ Usuarios registrados: <span id="userCount">0</span>
 
 <div id="depositPanel" class="card hidden">
 
-<h3 id="selectedNet"></h3>
+<h3 id="selectedTitle"></h3>
 
-<label>Dirección depósito</label>
+<p style="font-size:14px;opacity:.8">
+Debe depositar la cantidad exacta en la dirección indicada.
+Después pegue el hash de la transacción para validar su compra.
+</p>
 
-<input id="depositAddress"
-value="0x3670a0bFfb8b8A6D42177807F8dFd369A3995b9e"
-readonly>
+<label>Dirección de pago</label>
 
-<button class="copy" id="copyBtn">Copiar dirección</button>
+<input id="depositAddress" readonly>
 
-<input id="wallet" placeholder="Tu dirección para recibir">
-<input id="amount" type="number" placeholder="Cantidad USDT">
+<button class="copy" id="copyBtn">
+Copiar dirección
+</button>
 
-<input id="receive" placeholder="Recibirás" readonly>
+<input id="wallet" placeholder="Tu dirección para recibir FLASH">
+
+<input id="amount" type="number" placeholder="Cantidad a pagar">
+
+<input id="receive" placeholder="FLASH que recibirás" readonly>
 
 <input id="hash" placeholder="Hash de transacción">
 
-<button id="confirmDeposit">Confirmar depósito</button>
+<button id="confirmDeposit">Confirmar pago</button>
 
-<button id="backDash" style="margin-top:10px;background:#1e293b">Volver</button>
+<button id="backBtn" style="background:#1e293b;margin-top:10px">
+Volver
+</button>
 
 </div>
 
@@ -255,6 +278,10 @@ readonly>
 
 document.addEventListener("DOMContentLoaded",function(){
 
+const TRC20="TJvpGB5oUdyFRPg6YrdwLt8SWgNo6GoKwx"
+const BEP20="0x3670a0bFfb8b8A6D42177807F8dFd369A3995b9e"
+const BTC="bc1q4ltapgnt3ujfevjsgs0zl5p0wqprxg594vvnqg"
+
 const panels={
 register:document.getElementById("registerPanel"),
 login:document.getElementById("loginPanel"),
@@ -262,41 +289,54 @@ dashboard:document.getElementById("dashboardPanel"),
 deposit:document.getElementById("depositPanel")
 }
 
-function show(p){
-Object.values(panels).forEach(x=>x.classList.add("hidden"))
-panels[p].classList.remove("hidden")
+function show(panel){
+
+Object.values(panels).forEach(p=>p.classList.add("hidden"))
+
+panels[panel].classList.remove("hidden")
+
 }
 
 function toast(msg){
+
 let t=document.getElementById("toast")
+
 t.textContent=msg
+
 t.classList.add("show")
+
 setTimeout(()=>t.classList.remove("show"),3000)
+
 }
 
 function users(){
+
 return JSON.parse(localStorage.getItem("users")||"[]")
+
 }
 
-function saveUsers(u){
-localStorage.setItem("users",JSON.stringify(u))
+function saveUsers(list){
+
+localStorage.setItem("users",JSON.stringify(list))
+
 updateCount()
+
 }
 
 function updateCount(){
+
 document.getElementById("userCount").textContent=users().length
+
 }
 
 updateCount()
 
-/* REGISTER */
-
 document.getElementById("registerBtn").addEventListener("click",function(){
 
-let u=document.getElementById("regUser").value.trim()
-let e=document.getElementById("regEmail").value.trim()
-let p=document.getElementById("regPass").value
-let p2=document.getElementById("regPass2").value
+let u=regUser.value.trim()
+let e=regEmail.value.trim()
+let p=regPass.value
+let p2=regPass2.value
 
 if(!u||!e||!p||!p2){
 toast("Completa todos los campos")
@@ -321,30 +361,19 @@ saveUsers(list)
 
 toast("Registro exitoso")
 
-setTimeout(()=>{
-
-document.getElementById("regUser").value=""
-document.getElementById("regEmail").value=""
-document.getElementById("regPass").value=""
-document.getElementById("regPass2").value=""
-
-show("login")
-
-},1500)
+setTimeout(()=>show("login"),1500)
 
 })
 
-/* LOGIN */
+loginBtn.addEventListener("click",function(){
 
-document.getElementById("loginBtn").addEventListener("click",function(){
-
-let u=document.getElementById("loginUser").value
-let p=document.getElementById("loginPass").value
+let u=loginUser.value.trim()
+let p=loginPass.value.trim()
 
 let user=users().find(x=>x.user===u && x.pass===p)
 
 if(!user){
-toast("Usuario o contraseña incorrectos")
+toast("Datos incorrectos")
 return
 }
 
@@ -354,14 +383,14 @@ loadDashboard()
 
 })
 
-document.getElementById("toLogin").addEventListener("click",()=>show("login"))
-document.getElementById("toRegister").addEventListener("click",()=>show("register"))
+goLogin.onclick=()=>show("login")
+goRegister.onclick=()=>show("register")
 
 function loadDashboard(){
 
 let u=localStorage.getItem("session")
 
-document.getElementById("welcome").textContent="Hola "+u
+welcome.textContent="Hola "+u
 
 loadHistory()
 
@@ -369,17 +398,13 @@ show("dashboard")
 
 }
 
-/* LOGOUT */
-
-document.getElementById("logoutBtn").addEventListener("click",function(){
+logoutBtn.onclick=function(){
 
 localStorage.removeItem("session")
 
 show("login")
 
-})
-
-/* NETWORK */
+}
 
 let selected=null
 
@@ -397,109 +422,76 @@ selected=this.dataset.net
 
 })
 
-document.getElementById("goDeposit").addEventListener("click",function(){
+confirmNetwork.onclick=function(){
 
 if(!selected){
 toast("Selecciona una red")
 return
 }
 
-document.getElementById("selectedNet").textContent="Red: "+selected
+let address=""
+
+if(selected==="TRC20") address=TRC20
+if(selected==="BEP20") address=BEP20
+if(selected==="BTC") address=BTC
+
+depositAddress.value=address
+
+selectedTitle.textContent="Pago con "+selected
 
 show("deposit")
 
-})
+}
 
-/* COPY */
+copyBtn.onclick=function(){
 
-document.getElementById("copyBtn").addEventListener("click",function(){
-
-let addr=document.getElementById("depositAddress")
-
-navigator.clipboard.writeText(addr.value)
+navigator.clipboard.writeText(depositAddress.value)
 
 toast("Dirección copiada")
 
-})
+}
 
-/* CALC */
-
-document.getElementById("amount").addEventListener("input",function(){
+amount.addEventListener("input",function(){
 
 let a=parseFloat(this.value)||0
 
-document.getElementById("receive").value=a*5
+receive.value=a*5
 
 })
 
-/* VALID HASH */
-
 function validHash(h){
+
 return /^[A-Fa-f0-9]{64}$/.test(h)
-}
-
-function usedHashes(){
-return JSON.parse(localStorage.getItem("hashes")||"[]")
-}
-
-/* VALID WALLET */
-
-function validWallet(w){
-
-if(selected==="TRC20") return w.startsWith("T")
-
-if(selected==="BEP20") return w.startsWith("0x")
-
-if(selected==="BTC") return w.startsWith("1")||w.startsWith("3")||w.startsWith("bc1")
 
 }
 
-/* DEPOSIT */
+confirmDeposit.onclick=function(){
 
-document.getElementById("confirmDeposit").addEventListener("click",function(){
+let a=parseFloat(amount.value)
+let h=hash.value.trim()
 
-let wallet=document.getElementById("wallet").value.trim()
-let amount=parseFloat(document.getElementById("amount").value)
-let hash=document.getElementById("hash").value.trim()
-
-if(!wallet||!amount||!hash){
-toast("Completa todos los campos")
+if(!a||!h){
+toast("Completa los campos")
 return
 }
 
-if(amount<30){
-toast("Depósito mínimo 30 USDT")
+if(a<30){
+toast("Depósito mínimo 30")
 return
 }
 
-if(!validWallet(wallet)){
-toast("Dirección inválida")
-return
-}
-
-if(!validHash(hash)){
+if(!validHash(h)){
 toast("Hash inválido")
 return
 }
 
-let hashes=usedHashes()
-
-if(hashes.includes(hash)){
-toast("Hash ya utilizado")
-return
-}
-
-toast("Depósito en procesamiento")
+toast("Pago en verificación")
 
 setTimeout(()=>{
 
-hashes.push(hash)
+saveDeposit(a)
 
-localStorage.setItem("hashes",JSON.stringify(hashes))
-
-saveDeposit(amount)
-
-toast("Depósito confirmado")
+toast("Compra confirmada")
 
 loadHistory()
 
@@ -507,9 +499,9 @@ show("dashboard")
 
 },2000)
 
-})
+}
 
-function saveDeposit(amount){
+function saveDeposit(a){
 
 let u=localStorage.getItem("session")
 
@@ -519,8 +511,8 @@ let list=JSON.parse(localStorage.getItem(key)||"[]")
 
 list.push({
 net:selected,
-deposit:amount,
-receive:amount*5
+deposit:a,
+receive:a*5
 })
 
 localStorage.setItem(key,JSON.stringify(list))
@@ -533,9 +525,7 @@ let u=localStorage.getItem("session")
 
 let list=JSON.parse(localStorage.getItem("history_"+u)||"[]")
 
-let tbody=document.getElementById("history")
-
-tbody.innerHTML=""
+history.innerHTML=""
 
 list.forEach(x=>{
 
@@ -547,15 +537,13 @@ tr.innerHTML=`
 <td>${x.receive}</td>
 `
 
-tbody.appendChild(tr)
+history.appendChild(tr)
 
 })
 
 }
 
-document.getElementById("backDash").addEventListener("click",function(){
-show("dashboard")
-})
+backBtn.onclick=()=>show("dashboard")
 
 if(localStorage.getItem("session")){
 loadDashboard()
