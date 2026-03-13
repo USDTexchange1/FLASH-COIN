@@ -77,7 +77,6 @@ display:none;
 
 .networks{
 display:grid;
-grid-template-columns:1fr;
 gap:10px;
 margin-top:10px;
 }
@@ -150,6 +149,7 @@ background:#2563eb;
 <!-- REGISTER -->
 
 <div id="registerPanel" class="card">
+
 <h2>Registro</h2>
 
 <input id="regUser" placeholder="Usuario">
@@ -167,7 +167,6 @@ Usuarios registrados: <span id="userCount">0</span>
 
 </div>
 
-
 <!-- LOGIN -->
 
 <div id="loginPanel" class="card hidden">
@@ -182,7 +181,6 @@ Usuarios registrados: <span id="userCount">0</span>
 <div class="link" id="toRegister">Crear cuenta</div>
 
 </div>
-
 
 <!-- DASHBOARD -->
 
@@ -221,7 +219,6 @@ Usuarios registrados: <span id="userCount">0</span>
 </table>
 
 </div>
-
 
 <!-- DEPOSIT -->
 
@@ -271,13 +268,10 @@ panels[p].classList.remove("hidden")
 }
 
 function toast(msg){
-
 let t=document.getElementById("toast")
 t.textContent=msg
 t.classList.add("show")
-
 setTimeout(()=>t.classList.remove("show"),3000)
-
 }
 
 function users(){
@@ -305,7 +299,7 @@ let p=document.getElementById("regPass").value
 let p2=document.getElementById("regPass2").value
 
 if(!u||!e||!p||!p2){
-toast("Campos vacíos")
+toast("Completa todos los campos")
 return
 }
 
@@ -325,11 +319,18 @@ list.push({user:u,email:e,pass:p})
 
 saveUsers(list)
 
-localStorage.setItem("session",u)
-
 toast("Registro exitoso")
 
-loadDashboard()
+setTimeout(()=>{
+
+document.getElementById("regUser").value=""
+document.getElementById("regEmail").value=""
+document.getElementById("regPass").value=""
+document.getElementById("regPass2").value=""
+
+show("login")
+
+},1500)
 
 })
 
@@ -343,7 +344,7 @@ let p=document.getElementById("loginPass").value
 let user=users().find(x=>x.user===u && x.pass===p)
 
 if(!user){
-toast("Credenciales incorrectas")
+toast("Usuario o contraseña incorrectos")
 return
 }
 
@@ -353,10 +354,8 @@ loadDashboard()
 
 })
 
-document.getElementById("toLogin").onclick=()=>show("login")
-document.getElementById("toRegister").onclick=()=>show("register")
-
-/* SESSION */
+document.getElementById("toLogin").addEventListener("click",()=>show("login"))
+document.getElementById("toRegister").addEventListener("click",()=>show("register"))
 
 function loadDashboard(){
 
@@ -372,12 +371,13 @@ show("dashboard")
 
 /* LOGOUT */
 
-document.getElementById("logoutBtn").onclick=function(){
+document.getElementById("logoutBtn").addEventListener("click",function(){
 
 localStorage.removeItem("session")
+
 show("login")
 
-}
+})
 
 /* NETWORK */
 
@@ -397,10 +397,10 @@ selected=this.dataset.net
 
 })
 
-document.getElementById("goDeposit").onclick=function(){
+document.getElementById("goDeposit").addEventListener("click",function(){
 
 if(!selected){
-toast("Selecciona red")
+toast("Selecciona una red")
 return
 }
 
@@ -408,11 +408,11 @@ document.getElementById("selectedNet").textContent="Red: "+selected
 
 show("deposit")
 
-}
+})
 
 /* COPY */
 
-document.getElementById("copyBtn").onclick=function(){
+document.getElementById("copyBtn").addEventListener("click",function(){
 
 let addr=document.getElementById("depositAddress")
 
@@ -420,7 +420,7 @@ navigator.clipboard.writeText(addr.value)
 
 toast("Dirección copiada")
 
-}
+})
 
 /* CALC */
 
@@ -435,15 +435,11 @@ document.getElementById("receive").value=a*5
 /* VALID HASH */
 
 function validHash(h){
-
 return /^[A-Fa-f0-9]{64}$/.test(h)
-
 }
 
 function usedHashes(){
-
 return JSON.parse(localStorage.getItem("hashes")||"[]")
-
 }
 
 /* VALID WALLET */
@@ -460,16 +456,19 @@ if(selected==="BTC") return w.startsWith("1")||w.startsWith("3")||w.startsWith("
 
 /* DEPOSIT */
 
-document.getElementById("confirmDeposit").onclick=function(){
+document.getElementById("confirmDeposit").addEventListener("click",function(){
 
 let wallet=document.getElementById("wallet").value.trim()
-
 let amount=parseFloat(document.getElementById("amount").value)
-
 let hash=document.getElementById("hash").value.trim()
 
+if(!wallet||!amount||!hash){
+toast("Completa todos los campos")
+return
+}
+
 if(amount<30){
-toast("Mínimo 30 USDT")
+toast("Depósito mínimo 30 USDT")
 return
 }
 
@@ -486,7 +485,7 @@ return
 let hashes=usedHashes()
 
 if(hashes.includes(hash)){
-toast("Hash ya usado")
+toast("Hash ya utilizado")
 return
 }
 
@@ -508,7 +507,7 @@ show("dashboard")
 
 },2000)
 
-}
+})
 
 function saveDeposit(amount){
 
@@ -554,15 +553,9 @@ tbody.appendChild(tr)
 
 }
 
-/* BACK */
-
-document.getElementById("backDash").onclick=function(){
-
+document.getElementById("backDash").addEventListener("click",function(){
 show("dashboard")
-
-}
-
-/* AUTO SESSION */
+})
 
 if(localStorage.getItem("session")){
 loadDashboard()
