@@ -455,7 +455,7 @@ amount.addEventListener("input",function(){
 
 let a=parseFloat(this.value)||0
 
-receive.value=a*5
+receive.value=a*12
 
 })
 
@@ -475,8 +475,8 @@ toast("Completa los campos")
 return
 }
 
-if(a<30){
-toast("Depósito mínimo 30")
+if(a<10){
+toast("Depósito mínimo 10")
 return
 }
 
@@ -512,7 +512,7 @@ let list=JSON.parse(localStorage.getItem(key)||"[]")
 list.push({
 net:selected,
 deposit:a,
-receive:a*5
+receive:a*12
 })
 
 localStorage.setItem(key,JSON.stringify(list))
